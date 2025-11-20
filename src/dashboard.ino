@@ -8,7 +8,7 @@
 #include "Display.h"
 
 // SETTINGS =============================================================================================================================================================
-bool is_dashboard = true;
+bool is_dashboard = false;
 const int WRITE_FREQ = 10; // ms
 const int DATA_SWITCH = 28;
 const int STATUS_A = 12;
@@ -87,15 +87,15 @@ void handler(const CAN_message_t &msg) {
      tosend.imu_millis = millis();
  
      // log GPS
-      Serial.print("+");
-     if (myGNSS.getPVT(10)) {
-      Serial.print("-");tosend.unixtime = myGNSS.getUnixEpoch();
-      Serial.print("-");tosend.lat = myGNSS.getLatitude();
-      Serial.print("-");tosend.lon = myGNSS.getLongitude();
-      Serial.print("-");tosend.elev = myGNSS.getAltitude();
-      Serial.print("-");tosend.ground_speed = myGNSS.getGroundSpeed();	
-      Serial.print("-");tosend.gps_millis = millis();
-     }
+    //   Serial.print("+");
+    //  if (myGNSS.getPVT(10)) {
+    //   Serial.print("-");tosend.unixtime = myGNSS.getUnixEpoch();
+    //   Serial.print("-");tosend.lat = myGNSS.getLatitude();
+    //   Serial.print("-");tosend.lon = myGNSS.getLongitude();
+    //   Serial.print("-");tosend.elev = myGNSS.getAltitude();
+    //   Serial.print("-");tosend.ground_speed = myGNSS.getGroundSpeed();	
+    //   Serial.print("-");tosend.gps_millis = millis();
+    //  }
      Serial.print("done\n");
    }
 
@@ -206,8 +206,13 @@ void handler(const CAN_message_t &msg) {
     if (!is_dashboard && millis() > lastwrite + WRITE_FREQ) {
       tosend.write_millis = millis();
       file.write((byte*) &tosend, sizeof(tosend));
+      int ti = millis();
+      Serial8.write((byte*) &(ti), sizeof(ti));
+      Serial.printf("sent %d bytes to LoRa...\n", sizeof(ti));
+      Serial8.printf("\n\n\n");
       // file.write("END\n");
       file.flush();
+      Serial8.flush();
       // Serial.print("WROTE ############################################################## ");
       Serial.println(millis());
       lastwrite = millis();
@@ -292,6 +297,7 @@ void handler(const CAN_message_t &msg) {
 // SETUP ================================================================================================================================================================
 void setup() {
   Serial.begin(9600);
+  Serial8.begin(9600);
   matrix1.begin(0x70, &Wire);
   matrix2.begin(0x70, &Wire1);
 
